@@ -5,16 +5,16 @@ require_relative "lib/route_guard/version"
 Gem::Specification.new do |spec|
   spec.name          = "route_guard"
   spec.version       = RouteGuard::VERSION
-  spec.authors       = ["Amritesh"]
-  spec.email         = ["amritesh@example.com"]
+  spec.authors       = ["Amritesh Tiwari"]
+  spec.email         = ["t.amritesh801@gmail.com"]
 
   spec.summary       = "A production-ready static analysis tool for Rails routes."
   spec.description   = "Analyze Rails routes for shadowing, duplicates, unreachable routes, and maintainability metrics."
-  spec.homepage      = "https://github.com/amritesh/route_guard"
+  spec.homepage      = "https://github.com/amriteshtiwari/RouteGuard"
   spec.license       = "MIT"
   spec.required_ruby_version = ">= 3.2.0"
 
-  spec.metadata["allowed_push_host"] = "TODO: Set to your gem server"
+  spec.metadata["allowed_push_host"] = "https://rubygems.org"
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/main/CHANGELOG.md"
