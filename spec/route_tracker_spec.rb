@@ -40,8 +40,7 @@ RSpec.describe RouteGuard::RouteTracker do
       described_class.reset!
       described_class.enabled = true
 
-      # Mock find_routes_caller to return a fake file/line
-      allow(described_class).to receive(:find_routes_caller).and_return("config/routes.rb:15:in `block'")
+      allow(described_class).to receive(:find_routes_caller).and_return({ file: "config/routes.rb", line: 15 })
 
       routes = mock_routeset.add_route
       expect(routes.size).to eq(2)

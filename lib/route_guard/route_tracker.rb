@@ -51,11 +51,17 @@ module RouteGuard
         @prepended = true
       end
 
-      def find_routes_caller(stack)
-        stack.find do |line|
-          line.include?("config/routes") ||
-            line.include?("/routes.rb") ||
-            (defined?(RSpec) && line.include?("_spec.rb"))
+      def find_routes_caller(locations)
+        return nil unless locations
+        loc = locations.find do |l|
+          path = l.path
+          path.include?("config/routes") ||
+            path.include?("/routes.rb") ||
+            (defined?(RSpec) && path.include?("_spec.rb"))
+        end
+
+        if loc
+          { file: loc.path, line: loc.lineno }
         end
       end
     end
@@ -65,12 +71,8 @@ module RouteGuard
     def add_route(*args)
       route = super
       if RouteGuard::RouteTracker.enabled
-        # Capture caller trace pointing to routes definition files
-        trace = RouteGuard::RouteTracker.find_routes_caller(caller)
-        if trace
-          file, line, = trace.split(":")
-          trace_info = { file: file, line: line.to_i }
-
+        trace_info = RouteGuard::RouteTracker.find_routes_caller(caller_locations(1, 25))
+        if trace_info
           if route.is_a?(Array)
             route.each do |r|
               RouteGuard::RouteTracker.track_route(r.object_id, trace_info)
@@ -89,10 +91,8 @@ module RouteGuard
   module MapperExtension
     def resources(*args, &block)
       if RouteGuard::RouteTracker.enabled
-        trace = RouteGuard::RouteTracker.find_routes_caller(caller)
-        if trace
-          file, line, = trace.split(":")
-          trace_info = { file: file, line: line.to_i }
+        trace_info = RouteGuard::RouteTracker.find_routes_caller(caller_locations(1, 25))
+        if trace_info
           RouteGuard::RouteTracker.track_resource(:resources, args, scope_info, trace_info)
         end
       end
@@ -101,10 +101,8 @@ module RouteGuard
 
     def resource(*args, &block)
       if RouteGuard::RouteTracker.enabled
-        trace = RouteGuard::RouteTracker.find_routes_caller(caller)
-        if trace
-          file, line, = trace.split(":")
-          trace_info = { file: file, line: line.to_i }
+        trace_info = RouteGuard::RouteTracker.find_routes_caller(caller_locations(1, 25))
+        if trace_info
           RouteGuard::RouteTracker.track_resource(:resource, args, scope_info, trace_info)
         end
       end

@@ -13,7 +13,7 @@ module RouteGuard
       RouteTracker.enabled = true
 
       begin
-        if defined?(Rails) && Rails.application
+        if defined?(Rails) && Rails.respond_to?(:application) && Rails.application
           # Clear routes configuration to force full reloading and capture traces
           Rails.application.reload_routes!
           load_from_route_set(Rails.application.routes)
