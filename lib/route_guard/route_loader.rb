@@ -13,9 +13,18 @@ module RouteGuard
       RouteTracker.enabled = true
 
       begin
+        $stderr.puts "RouteGuard Debug: defined?(Rails) = #{defined?(Rails)}"
+        if defined?(Rails)
+          $stderr.puts "RouteGuard Debug: Rails.respond_to?(:application) = #{Rails.respond_to?(:application)}"
+          $stderr.puts "RouteGuard Debug: Rails.application = #{Rails.application.nil? ? 'nil' : Rails.application.class.name}"
+          if Rails.respond_to?(:application) && Rails.application
+            $stderr.puts "RouteGuard Debug: Routes size before reload = #{Rails.application.routes.routes.size}"
+            Rails.application.reload_routes!
+            $stderr.puts "RouteGuard Debug: Routes size after reload = #{Rails.application.routes.routes.size}"
+          end
+        end
+
         if defined?(Rails) && Rails.respond_to?(:application) && Rails.application
-          # Clear routes configuration to force full reloading and capture traces
-          Rails.application.reload_routes!
           load_from_route_set(Rails.application.routes)
         else
           []
