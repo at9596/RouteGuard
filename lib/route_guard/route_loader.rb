@@ -16,11 +16,13 @@ module RouteGuard
         $stderr.puts "RouteGuard Debug: defined?(Rails) = #{defined?(Rails)}"
         if defined?(Rails)
           $stderr.puts "RouteGuard Debug: Rails.respond_to?(:application) = #{Rails.respond_to?(:application)}"
-          $stderr.puts "RouteGuard Debug: Rails.application = #{Rails.application.nil? ? 'nil' : Rails.application.class.name}"
           if Rails.respond_to?(:application) && Rails.application
+            $stderr.puts "RouteGuard Debug: Rails.application = #{Rails.application.class.name}"
             $stderr.puts "RouteGuard Debug: Routes size before reload = #{Rails.application.routes.routes.size}"
             Rails.application.reload_routes!
             $stderr.puts "RouteGuard Debug: Routes size after reload = #{Rails.application.routes.routes.size}"
+          else
+            $stderr.puts "RouteGuard Debug: Rails.application = nil/undefined"
           end
         end
 
@@ -35,7 +37,7 @@ module RouteGuard
     end
 
     def self.load_environment!
-      return if defined?(Rails)
+      return if defined?(Rails) && Rails.respond_to?(:application) && Rails.application
 
       env_file = File.expand_path("config/environment.rb", Dir.pwd)
       if File.exist?(env_file)
