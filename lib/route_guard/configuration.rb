@@ -10,6 +10,7 @@ module RouteGuard
       unreachable_routes
       duplicate_helpers
       duplicate_resources
+      unused_routes
       statistics
       complexity
     ].freeze

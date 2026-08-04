@@ -8,6 +8,7 @@ require_relative "rules/duplicate_helpers"
 require_relative "rules/duplicate_resources"
 require_relative "rules/statistics"
 require_relative "rules/complexity"
+require_relative "rules/unused_routes"
 
 module RouteGuard
   class Analyzer
@@ -18,7 +19,8 @@ module RouteGuard
       duplicate_helpers: Rules::DuplicateHelpers,
       duplicate_resources: Rules::DuplicateResources,
       statistics: Rules::Statistics,
-      complexity: Rules::Complexity
+      complexity: Rules::Complexity,
+      unused_routes: Rules::UnusedRoutes
     }.freeze
 
     def self.analyze(routes, enabled_rules, options = {})
@@ -33,7 +35,7 @@ module RouteGuard
 
       # 2. Run other lint rules
       issues = []
-      lint_rules = %i[duplicate_routes shadowed_routes unreachable_routes duplicate_helpers duplicate_resources]
+      lint_rules = %i[duplicate_routes shadowed_routes unreachable_routes duplicate_helpers duplicate_resources unused_routes]
       (lint_rules & enabled_rules).each do |rule_sym|
         rule_class = RULE_MAPPING[rule_sym]
         next unless rule_class
