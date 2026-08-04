@@ -50,6 +50,19 @@ RSpec.describe RouteGuard::Rules::Base do
       expect(base_rule.path_shadows?(seg_a, seg_b, { id: "edit" }, {})).to be false
     end
 
+    it "handles string and regexp constraint combinations" do
+      seg_a = ["", "users", ":id"]
+      seg_b = ["", "users", ":user_id"]
+
+      # constA is Regexp, constB is String
+      expect(base_rule.path_shadows?(seg_a, seg_b, { id: /\d+/ }, { user_id: "123" })).to be true
+      expect(base_rule.path_shadows?(seg_a, seg_b, { id: /\d+/ }, { user_id: "abc" })).to be false
+
+      # constA is String, constB is Regexp
+      expect(base_rule.path_shadows?(seg_a, seg_b, { id: "123" }, { user_id: /\d+/ })).to be true
+      expect(base_rule.path_shadows?(seg_a, seg_b, { id: "abc" }, { user_id: /\d+/ })).to be false
+    end
+
     it "returns false if sA is literal and sB is dynamic" do
       seg_a = ["", "users", "new"]
       seg_b = ["", "users", ":id"]

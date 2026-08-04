@@ -109,7 +109,22 @@ module RouteGuard
               constB = constraintsB[param_B.to_sym]
 
               if constA
-                unless constB && (constB.source == constA.source || constA.match?(constB.source))
+                if constB
+                  match = if constA.is_a?(Regexp)
+                            if constB.is_a?(Regexp)
+                              constB.source == constA.source || constA.match?(constB.source)
+                            else
+                              constA.match?(constB.to_s)
+                            end
+                          else
+                            if constB.is_a?(Regexp)
+                              constB.match?(constA.to_s)
+                            else
+                              constA.to_s == constB.to_s
+                            end
+                          end
+                  return false unless match
+                else
                   return false
                 end
               end
