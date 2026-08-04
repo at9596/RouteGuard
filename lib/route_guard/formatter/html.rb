@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "cgi"
+require "json"
 require_relative "../version"
 
 module RouteGuard
