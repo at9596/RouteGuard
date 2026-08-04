@@ -8,17 +8,38 @@ module RouteGuard
     class ShadowedRoutes < Base
       def analyze(routes, report)
         issues = []
+        return issues if routes.empty?
 
-        routes.each_with_index do |route_b, idx|
-          # Skip if route_b is a catch-all wildcard itself, as it's not shadowed in the typical sense
-          next if catch_all_wildcard?(route_b)
+        # Cache segment info and path expansions for all routes
+        route_info = routes.map do |r|
+          segs = split_segments(r.path)
+          {
+            route: r,
+            segs: segs,
+            first: segs[1],
+            is_catch_all: catch_all_wildcard?(r),
+            expansions: (expand_path(r.original_path).map { |p| split_segments(p) } rescue [[r.path]])
+          }
+        end
 
-          # Find if any earlier route shadows route_b
-          routes[0...idx].each do |route_a|
-            # Skip if route_a is a catch-all wildcard, as that is handled by UnreachableRoutes
-            next if catch_all_wildcard?(route_a)
+        route_info.each_with_index do |info_b, idx|
+          next if info_b[:is_catch_all]
+          route_b = info_b[:route]
+          first_b = info_b[:first]
 
-            if shadows?(route_a, route_b)
+          route_info[0...idx].each do |info_a|
+            next if info_a[:is_catch_all]
+            first_a = info_a[:first]
+
+            # Optimization: Skip comparisons if first literal segment doesn't match
+            if first_a && first_b && !first_a.start_with?(":") && !first_a.start_with?("*")
+              next if first_a != first_b
+            end
+
+            route_a = info_a[:route]
+            next unless verb_matches?(route_a.verb, route_b.verb)
+
+            if shadows_cached?(info_a, info_b)
               issues << Models::Issue.new(
                 rule_name: :shadowed_routes,
                 severity: :warning,
@@ -26,7 +47,6 @@ module RouteGuard
                 route: route_b,
                 related_routes: [route_a]
               )
-              # Stop after finding the first shadowing route to avoid duplicate warnings for the same route
               break
             end
           end
@@ -42,22 +62,15 @@ module RouteGuard
         path == "/*path" || path == "*path" || path.match?(/\A\/?\*[a-zA-Z_]+\z/)
       end
 
-      def shadows?(route_a, route_b)
-        return false unless verb_matches?(route_a.verb, route_b.verb)
+      def shadows_cached?(info_a, info_b)
+        route_a = info_a[:route]
+        route_b = info_b[:route]
         return false if route_a.path == route_b.path
 
-        begin
-          expansions_a = expand_path(route_a.original_path).map { |p| split_segments(p) }
-          expansions_b = expand_path(route_b.original_path).map { |p| split_segments(p) }
-
-          expansions_b.all? do |seg_b|
-            expansions_a.any? do |seg_a|
-              path_shadows?(seg_a, seg_b, route_a.constraints, route_b.constraints)
-            end
+        info_b[:expansions].all? do |seg_b|
+          info_a[:expansions].any? do |seg_a|
+            path_shadows?(seg_a, seg_b, route_a.constraints, route_b.constraints)
           end
-        rescue => e
-          # Fallback if path parsing fails
-          false
         end
       end
     end
