@@ -13,24 +13,18 @@ module RouteGuard
     end
 
     def run
-      if config.formatters.include?(:terminal) || config.verbose
-        $stderr.puts "RouteGuard: Loading Rails environment and reloading routes..."
-      end
+      $stderr.puts "RouteGuard: Loading Rails environment and reloading routes..."
 
       routes = RouteLoader.load
 
-      if config.formatters.include?(:terminal) || config.verbose
-        $stderr.puts "RouteGuard: Loaded #{routes.size} routes. Running #{config.enabled_rules.size} inspections..."
-      end
+      $stderr.puts "RouteGuard: Loaded #{routes.size} routes. Running #{config.enabled_rules.size} inspections..."
 
       report = Analyzer.analyze(routes, config.enabled_rules, {
         strict: config.strict,
         verbose: config.verbose
       })
 
-      if config.formatters.include?(:terminal) || config.verbose
-        $stderr.puts "RouteGuard: Inspections complete."
-      end
+      $stderr.puts "RouteGuard: Inspections complete."
 
       report
     end
