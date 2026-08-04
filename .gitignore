@@ -1,0 +1,13 @@
+# Test results and coverage
+/coverage/
+/.rspec_status
+/test.log
+/tmp/
+
+# Bundler
+/.bundle/
+/vendor/bundle/
+
+# Gem builds
+/pkg/
+*.gem

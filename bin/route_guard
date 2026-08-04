@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../lib/route_guard"
+
+begin
+  RouteGuard::CLI.start(ARGV)
+rescue SystemExit => e
+  # Propagate CLI exits
+  exit(e.status)
+rescue => e
+  warn "Error: #{e.message}"
+  exit(1)
+end
