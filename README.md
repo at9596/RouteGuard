@@ -121,4 +121,4 @@ RouteGuard automatically integrates with your Rails app through its built-in Rai
 
 ## 📝 License
 
-RouteGuard is available as open source under the terms of the [MIT License](LICENSE.txt).
+RouteGuard is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
